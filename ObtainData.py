@@ -48,7 +48,7 @@ def kline_data(stime, etime, symbol = 'BTCUSDT', interval = '1d'):
     
     data.iloc[:,[1,2,3,4,5,7,9,10]] = data.iloc[:,[1,2,3,4,5,7,9,10]].astype(float)
     
-    return data.iloc[:,[0,1,2,3,4,5]]
+    return data
     
 if __name__ == '__main__':
     
@@ -62,4 +62,4 @@ if __name__ == '__main__':
     BASE_URL = 'https://fapi.binance.com' # production base url
     
     data = kline_data(stime, etime, symbol = 'BTCUSDT', interval = '1d')
-    data.to_csv('BTC_test.csv',index = False)
+    data.to_csv('data/BTC_1d.csv',index = False)
