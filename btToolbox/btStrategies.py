@@ -17,10 +17,12 @@ class DemoStrategy(bt.Strategy):
     def __init__(self):
         # Keep a reference to the "close" line in the data[0] dataseries
         self.dataclose = self.datas[0].close
+        self.quote = self.datas[0].quote
 
     def next(self):
         # Simply log the closing price of the series from the reference
         self.log('Close, %.2f' % self.dataclose[0])
+        self.log('Quote, %.2f' % self.quote[0])
 
 
 # Create a Stratey

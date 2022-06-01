@@ -25,54 +25,52 @@ import pandas as pd
 import talib as ta
 
 from btToolbox.btStrategies import EMACrossOverStrategy, DemoStrategy
-                
-               
-class MyHLOC(btfreeds.GenericCSVData):
-
-  params = (
-    ('fromdate', datetime.datetime(2000, 1, 1)),
-    ('todate', datetime.datetime(2000, 12, 31)),
-    ('nullvalue', 0.0),
-    ('dtformat', ('%Y-%m-%d')),
-    ('tmformat', ('%H.%M.%S')),
-
-    ('datetime', 0),
-    ('time', 1),
-    ('high', 2),
-    ('low', 3),
-    ('open', 4),
-    ('close', 5),
-    ('volume', 6),
-    ('openinterest', -1)
-)
+from btToolbox.btDataFeed import CSVData, PdData
+from btToolbox.btObervers import OrderObserver
+    
                 
 def runstart(line_a,line_b,datapath):
     
     # TODO // Create a Cerebro
-    cerebro = bt.Cerebro()
-    # cerebro = bt.Cerebro(stdstats=False) # uncomment for deleting the default observers(broker, trades)
+    cerebro = bt.Cerebro() # default observers: Broker,traders
     
     # TODO // Add observers
-    cerebro.addobserver(bt.observers.Broker)
-    cerebro.addobserver(bt.observers.Trades)
-    cerebro.addobserver(bt.observers.BuySell)
-    cerebro.addobserver(bt.observers.DrawDown)
+    # cerebro = bt.Cerebro(stdstats=False) # uncomment for deleting the default observers(broker, trades, BuySell)
+    #* self-defined observer
+    cerebro.addobserver(OrderObserver)
+    # cerebro.addobserver(bt.observers.Broker)
+    # cerebro.addobserver(bt.observers.Trades)
+    # cerebro.addobserver(bt.observers.BuySell)
+    # cerebro.addobserver(bt.observers.DrawDown)
     
     # for store the analytical indicators
     Myown_result = []
     
     # TODO // Add a Data
-    dataframe = pd.read_csv(datapath,
-                                # nrows=1000, # uncomment for large dataset
-                                parse_dates=True,
-                                index_col=0)
+    #* method 1: default pandas data frame
+    # dataframe = pd.read_csv(datapath,
+    #                             # nrows=1000, # uncomment for large dataset
+    #                             parse_dates=True,
+    #                             index_col=0)
+    # data = bt.feeds.PandasData(dataname=dataframe)
     
-    # Pass it to the backtrader datafeed and add it to the cerebro
-    data = bt.feeds.PandasData(dataname=dataframe)
+    #* method 2: self-define CSV file (one more quote)
+    data = CSVData(dataname=datapath)
+    
+    #* method 3: self-pandas dataframe
+    # dataframe = pd.read_csv(datapath,
+    #                             # nrows=1000, # uncomment for large dataset
+    #                             parse_dates=True,
+    #                             index_col=0)
+    # # print(dataframe.info())
+    # data = PdData(dataname = dataframe)
+    
+    #* add to cerebro
     cerebro.adddata(data)
+
     
     # TODO // Add a strategy
-    cerebro.addstrategy(EMACrossOverStrategy,line_a = line_a,line_b=line_b)
+    # cerebro.addstrategy(EMACrossOverStrategy,line_a = line_a,line_b=line_b)
     cerebro.addstrategy(DemoStrategy)
     
     # TODO // Analyzer
@@ -114,8 +112,8 @@ def runstart(line_a,line_b,datapath):
     # print('Sharpe Ratio:', SharpeRatio.get_analysis()['SharpeRatio'])
     # print('Sharpe Ratio:', SharpeRatio.get_analysis())
     
-    SharpeRatio = strat.analyzers.getbyname('SharpeRatio')
-    Myown_result.append(SharpeRatio.get_analysis()['sharperatio'])
+    # SharpeRatio = strat.analyzers.getbyname('SharpeRatio')
+    # Myown_result.append(SharpeRatio.get_analysis()['sharperatio'])
     
     # AnnualReturn = strat.analyzers.getbyname('AnnualReturn')
     # Myown_result.append(AnnualReturn.get_analysis())

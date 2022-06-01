@@ -48,7 +48,7 @@ def kline_data(stime, etime, symbol = 'BTCUSDT', interval = '1d'):
     
     data.iloc[:,[1,2,3,4,5,7,9,10]] = data.iloc[:,[1,2,3,4,5,7,9,10]].astype(float)
     
-    return data
+    return data.iloc[:,[0,1,2,3,4,5,7,9,10]]
     
 if __name__ == '__main__':
     
