@@ -1,8 +1,7 @@
-# Backtrader tut
-#! Author: Cholian Li
+# Author: Cholian Li
 # Contact: 
-#! cholianli970518@gmail.com
-# Created at 20211228
+# cholianli970518@gmail.com
+# Created at 20220601
 
 '''
 ############################## Possible BUG ##########################################
@@ -25,20 +24,20 @@ import backtrader as bt
 import pandas as pd
 import talib as ta
 
-# # Create a Stratey
-# class TestStrategy(bt.Strategy):
-#     params = (
-#         ('line_a', None),
-#         ('line_b',None),
-#     )
+# Create a Stratey
+class TestStrategy(bt.Strategy):
+    params = (
+        ('line_a', None),
+        ('line_b',None),
+    )
 
-#     def log(self, txt, dt=None):
+    def log(self, txt, dt=None):
         
-#         pass
+        # pass
     
-#         ''' Logging function for this strategy'''
-#         dt = dt or self.datas[0].datetime.datetime(0)
-#         print('%s, %s' % (dt, txt))
+        ''' Logging function for this strategy'''
+        dt = dt or self.datas[0].datetime.datetime(0)
+        print('%s, %s' % (dt, txt))
 
 #     def __init__(self):
 #         # Keep a reference to the "close" line in the data[0] dataseries
@@ -146,48 +145,38 @@ import talib as ta
                 
 def runstart(line_a,line_b,datapath):
     
+    # TODO // Create a Cerebro
     cerebro = bt.Cerebro()
-
-    # self-define the observers
-    # cerebro = bt.Cerebro(stdstats=False)
+    # cerebro = bt.Cerebro(stdstats=False) # uncomment for deleting the default observers(broker, trades)
     
     # TODO // Add observers
-    # cerebro.addobserver(bt.observers.Broker)
+    cerebro.addobserver(bt.observers.Broker)
+    cerebro.addobserver(bt.observers.Trades)
+    cerebro.addobserver(bt.observers.BuySell)
+    cerebro.addobserver(bt.observers.DrawDown)
     
+    # for store the analytical indicators
     Myown_result = []
     
     # TODO // Add a Data
-    # train_data
-    # datapath = ('data/BTC_6h_test.csv')
-    
-    # test_data
-    # datapath = ('data/BTC_1hr_test.csv')
     dataframe = pd.read_csv(datapath,
-                                # nrows=1000,
-                                # skiprows = range(1,1500),
+                                # nrows=1000, # uncomment for large dataset
                                 parse_dates=True,
                                 index_col=0)
-    
-    # print('--------------------------------------------------')
-    # print(dataframe.head(5))
-    # print(dataframe.info())
-    # print('--------------------------------------------------')
     
     # Pass it to the backtrader datafeed and add it to the cerebro
     data = bt.feeds.PandasData(dataname=dataframe)
     cerebro.adddata(data)
     
     # TODO // Add a strategy
-    # cerebro.addstrategy(TestStrategy,line_a = line_a,line_b=line_b)
+    cerebro.addstrategy(TestStrategy,line_a = line_a,line_b=line_b)
     
     # TODO // Analyzer
-    cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='SharpeRatio')
+    # cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='SharpeRatio')
     # cerebro.addanalyzer(bt.analyzers.AnnualReturn, _name='AnnualReturn')
     # cerebro.addanalyzer(bt.analyzers.DrawDown, _name='DrawDown')
     # cerebro.addanalyzer(bt.analyzers.TimeDrawDown, _name='TimeDrawDown')
     # cerebro.addanalyzer(bt.analyzers.TimeReturn, _name='TimeReturn')
-    
-    # cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     
     # TODO // Cash
     cerebro.broker.setcash(1000.0)
@@ -202,6 +191,7 @@ def runstart(line_a,line_b,datapath):
     # print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
     Myown_result.append(cerebro.broker.getvalue())
     results = cerebro.run()
+    
     # print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
     Myown_result.append(cerebro.broker.getvalue())
     
@@ -236,26 +226,6 @@ def runstart(line_a,line_b,datapath):
     # TimeReturn = strat.analyzers.getbyname('TimeReturn')
     # print(TimeReturn.get_analysis())
     
-    ################################################################################################
-    ############################# pyfolio module api for performance ###############################
-    ################################################################################################
-    '''
-    # ref
-    # http://quantopian.github.io/pyfolio/notebooks/single_stock_example/
-    # https://www.backtrader.com/docu/analyzers/pyfolio-integration/pyfolio-integration/
-    '''
-    # pyfoliozer = strat.analyzers.getbyname('pyfolio')
-    # returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
-    
-    # import pyfolio as pf
-    # pf.create_full_tear_sheet(
-    #     returns,
-    #     positions=positions,
-    #     transactions=transactions,
-    #     gross_lev=gross_lev,
-    #     live_start_date='2018-05-01',  # This date is sample specific
-    #     round_trips=True)
-    ###################################################################################################
     
     Myown_result.append(line_a)
     Myown_result.append(line_b)
@@ -292,7 +262,7 @@ def runstart(line_a,line_b,datapath):
 
 if __name__ == '__main__':
 
-    datapath = ('data/BTC_6h_test.csv')
+    datapath = ('BTC_1h_test.csv')
     # validation_runstart(datapath)
-    # runstart(36,60,datapath)
+    runstart(36,60,datapath)
             
