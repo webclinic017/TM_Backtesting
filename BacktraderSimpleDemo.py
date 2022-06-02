@@ -24,7 +24,7 @@ if __name__ == '__main__':
     
     cerebro.broker.setcash(100000.0)
     
-    datapath = ('BTC_1h_test.csv')
+    datapath = ('data/BTC_1d.csv')
     
     dataframe = pd.read_csv(datapath,
                         # nrows=1000,

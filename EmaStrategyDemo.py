@@ -27,6 +27,7 @@ import talib as ta
 from btToolbox.btStrategies import EMACrossOverStrategy, DemoStrategy
 from btToolbox.btDataFeed import CSVData, PdData
 from btToolbox.btObervers import OrderObserver
+from btToolbox.btAnalyzers import MySharpeRatio
     
                 
 def runstart(line_a,line_b,datapath):
@@ -36,15 +37,15 @@ def runstart(line_a,line_b,datapath):
     
     # TODO // Add observers
     # cerebro = bt.Cerebro(stdstats=False) # uncomment for deleting the default observers(broker, trades, BuySell)
-    #* self-defined observer
+    
+    #* self-defined observers
     cerebro.addobserver(OrderObserver)
+    
+    #* default Observers
     # cerebro.addobserver(bt.observers.Broker)
     # cerebro.addobserver(bt.observers.Trades)
     # cerebro.addobserver(bt.observers.BuySell)
     # cerebro.addobserver(bt.observers.DrawDown)
-    
-    # for store the analytical indicators
-    Myown_result = []
     
     # TODO // Add a Data
     #* method 1: default pandas data frame
@@ -54,7 +55,7 @@ def runstart(line_a,line_b,datapath):
     #                             index_col=0)
     # data = bt.feeds.PandasData(dataname=dataframe)
     
-    #* method 2: self-define CSV file (one more quote)
+    #* method 2: self-define CSV file (recommended)
     data = CSVData(dataname=datapath)
     
     #* method 3: self-pandas dataframe
@@ -68,18 +69,26 @@ def runstart(line_a,line_b,datapath):
     #* add to cerebro
     cerebro.adddata(data)
 
-    
     # TODO // Add a strategy
-    # cerebro.addstrategy(EMACrossOverStrategy,line_a = line_a,line_b=line_b)
-    cerebro.addstrategy(DemoStrategy)
+    cerebro.addstrategy(EMACrossOverStrategy,line_a = line_a,line_b=line_b)
+    # cerebro.addstrategy(DemoStrategy)
     
     # TODO // Analyzer
+    
+    # * method 1: self-defined analyzers
+    cerebro.addanalyzer(MySharpeRatio, _name='MySharpeRatio')
+    
+    # * method 2: default analyzers
     # cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='SharpeRatio')
+    
+    ######################### e.g start ###############################################
     # cerebro.addanalyzer(bt.analyzers.AnnualReturn, _name='AnnualReturn')
     # cerebro.addanalyzer(bt.analyzers.DrawDown, _name='DrawDown')
     # cerebro.addanalyzer(bt.analyzers.TimeDrawDown, _name='TimeDrawDown')
     # cerebro.addanalyzer(bt.analyzers.TimeReturn, _name='TimeReturn')
+    ######################### e.g end ###############################################
     
+    # * method 3: 
     # TODO // Cash
     cerebro.broker.setcash(1000.0)
 
@@ -89,32 +98,41 @@ def runstart(line_a,line_b,datapath):
     # TODO // Set the commission - 0.1% ... divide by 100 to remove the %
     cerebro.broker.setcommission(commission=0.0004)
 
+    # TODO // For storing the analytical indicators result
+    Myown_result = []
+
     # TODO // Run over everything
-    # print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
-    Myown_result.append(cerebro.broker.getvalue())
+    print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    Myown_result.append(cerebro.broker.getvalue()) # (Initial portfolio value) save to the list
     results = cerebro.run()
     
-    # print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
-    Myown_result.append(cerebro.broker.getvalue())
-    
-    Myown_result.append(Myown_result[1]/Myown_result[0]-1)
+    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    Myown_result.append(cerebro.broker.getvalue()) # (Final portfolio value) save to the list
+    Myown_result.append(Myown_result[1]/Myown_result[0]-1) #  (cumulative return) save to the list
 
     # TODO // Plot the result
     cerebro.plot()
     
-    # TODO // result
+    # TODO // Collect the Analyzer result
     strat = results[0]
     
+    # * method 1
     # SharpeRatio = strat.analyzers.SharpeRatio.get_analysis()
-    # print('Sharpe Ratio:', SharpeRatio)
-    # or
-    # SharpeRatio = strat.analyzers.getbyname('SharpeRatio')
-    # print('Sharpe Ratio:', SharpeRatio.get_analysis()['SharpeRatio'])
-    # print('Sharpe Ratio:', SharpeRatio.get_analysis())
+    # print('Default Sharpe Ratio:', SharpeRatio)
     
-    # SharpeRatio = strat.analyzers.getbyname('SharpeRatio')
-    # Myown_result.append(SharpeRatio.get_analysis()['sharperatio'])
+    # SharpeRatio = strat.analyzers.MySharpeRatio.get_analysis()
+    # print('MySharpe Ratio:', SharpeRatio)
     
+    # * method 2 (recommended)
+    SharpeRatio = strat.analyzers.getbyname('SharpeRatio')
+    Myown_result.append(SharpeRatio.get_analysis()['sharperatio'])
+    print('Default Sharpe Ratio:', SharpeRatio.get_analysis()['sharperatio'])
+    
+    SharpeRatio = strat.analyzers.getbyname('MySharpeRatio')
+    Myown_result.append(SharpeRatio.get_analysis()['mysharperatio'])
+    print('MySharpe Ratio:', SharpeRatio.get_analysis()['mysharperatio'])
+    
+    ######################### e.g start ###############################################
     # AnnualReturn = strat.analyzers.getbyname('AnnualReturn')
     # Myown_result.append(AnnualReturn.get_analysis())
     
@@ -127,8 +145,9 @@ def runstart(line_a,line_b,datapath):
     
     # TimeReturn = strat.analyzers.getbyname('TimeReturn')
     # print(TimeReturn.get_analysis())
+    ######################### e.g end ###############################################
     
-    
+    # TODO // Collect other information
     Myown_result.append(line_a)
     Myown_result.append(line_b)
     
@@ -136,30 +155,30 @@ def runstart(line_a,line_b,datapath):
     
     return Myown_result
 
-# def validation_runstart(datapath):
+def validation_runstart(datapath):
     
-#     column_names = [
-#         "starting cash", 
-#         "ending cash", 
-#         "return",
-#         'sharp ratio',
-#         # 'annual return'
-#         'line_a',
-#         'line_b'
-#         ]
+    column_names = [
+        "starting cash", 
+        "ending cash", 
+        "return",
+        'sharp ratio',
+        # 'annual return'
+        'line_a',
+        'line_b'
+        ]
     
-#     # result_table = pd.DataFrame(columns=column_names)
-#     result_table = []
+    # result_table = pd.DataFrame(columns=column_names)
+    result_table = []
     
-#     for i in range(10,100):
-#         for j in range(i,100):
-#             if i != j:
-#                 res = runstart(i,j,datapath)
-#                 result_table.append(res)
-#                 print(i,j,'finished')
+    for i in range(10,100):
+        for j in range(i,100):
+            if i != j:
+                res = runstart(i,j,datapath)
+                result_table.append(res)
+                print(i,j,'finished')
     
-#     result_table = pd.DataFrame(result_table,columns = column_names)
-#     result_table.to_csv('Validation_future_6h_train.csv',encoding='utf-8')
+    result_table = pd.DataFrame(result_table,columns = column_names)
+    result_table.to_csv('Validation_future_6h_train.csv',encoding='utf-8')
     
 
 if __name__ == '__main__':
