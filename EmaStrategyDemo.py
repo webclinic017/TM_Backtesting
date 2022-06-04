@@ -79,7 +79,7 @@ def runstart(line_a,line_b,datapath):
     cerebro.addanalyzer(MySharpeRatio, _name='MySharpeRatio')
     
     # * method 2: default analyzers
-    # cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='SharpeRatio')
+    cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='SharpeRatio')
     
     ######################### e.g start ###############################################
     # cerebro.addanalyzer(bt.analyzers.AnnualReturn, _name='AnnualReturn')
@@ -89,6 +89,8 @@ def runstart(line_a,line_b,datapath):
     ######################### e.g end ###############################################
     
     # * method 3: 
+    # cerebro.addanalyzer(bt.analyzers.PyFolio)
+    
     # TODO // Cash
     cerebro.broker.setcash(1000.0)
 
@@ -129,8 +131,8 @@ def runstart(line_a,line_b,datapath):
     print('Default Sharpe Ratio:', SharpeRatio.get_analysis()['sharperatio'])
     
     SharpeRatio = strat.analyzers.getbyname('MySharpeRatio')
-    Myown_result.append(SharpeRatio.get_analysis()['mysharperatio'])
-    print('MySharpe Ratio:', SharpeRatio.get_analysis()['mysharperatio'])
+    Myown_result.append(SharpeRatio.get_analysis()['sharperatio'])
+    print('MySharpe Ratio:', SharpeRatio.get_analysis()['sharperatio'])
     
     ######################### e.g start ###############################################
     # AnnualReturn = strat.analyzers.getbyname('AnnualReturn')

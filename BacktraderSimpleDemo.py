@@ -16,10 +16,11 @@ class TestStrategy(bt.Strategy):
     def next(self):
         # Simply log the closing price of the series from the reference
         self.log('Close, %.2f' % self.dataclose[0])
-
+        
 if __name__ == '__main__':
     
     cerebro = bt.Cerebro()
+    
     cerebro.addstrategy(TestStrategy)
     
     cerebro.broker.setcash(100000.0)
