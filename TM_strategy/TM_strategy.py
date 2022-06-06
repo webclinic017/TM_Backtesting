@@ -26,8 +26,6 @@ class TM_strategy(btfeeds.GenericCSVData):
         ('volume', -1),
         ('quote', -1),
         
-        # ('token_id', 0),
-        # ('symbol', 1),
         ('datetime', 2),
         ('close', 3),
         ('frama', 4),
@@ -105,8 +103,11 @@ class TestStrategy(bt.Strategy):
         self.order = None
         
     def next(self):
+        
         # self.log(self.close[0])
         # self.log(self.signal[0])
+        
+        # already have a position
         if self.position:
             if self.position.size < 0:
                 # signal = +1
@@ -116,7 +117,7 @@ class TestStrategy(bt.Strategy):
         
                 
             elif self.position.size > 0:
-                # signal = +1
+                # signal = -1
                 if self.signal[0] == -1:
                     self.sell()
                     self.sell()
@@ -148,7 +149,6 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     cerebro.broker.setcash(100000.0)
 
-        
     datapath = ('data/TM_strategyEMA2.csv')
     
     data = TM_strategy(dataname=datapath)
@@ -168,12 +168,14 @@ if __name__ == '__main__':
     
     strat = strats[0]
     
-    pyfoliozer = strat.analyzers.getbyname('pyfolio')
-    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+
+    # # * Save results for analyzing via pyfolio
+    # pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    # returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
     
     
-    returns.to_csv('result/returns.csv')
-    positions.to_csv('result/positions.csv')
-    transactions.to_csv('result/transactions.csv')
-    gross_lev.to_csv('result/gross_lev.csv')
+    # returns.to_csv('result/returns.csv')
+    # positions.to_csv('result/positions.csv')
+    # transactions.to_csv('result/transactions.csv')
+    # gross_lev.to_csv('result/gross_lev.csv')
     
