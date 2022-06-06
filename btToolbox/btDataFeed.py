@@ -38,3 +38,28 @@ class PdData(btfeeds.PandasData):
         ('volume', 5),
         ('quote', 6),
     )
+    
+class TM_strategy(btfeeds.GenericCSVData):
+    # add one more columns called quote
+    lines = ('datetime','frama','ema','trend','signal')
+
+    params = (
+        ('nullvalue', 0.0),
+        ('dtformat', ('%Y-%m-%d')),
+        # ('tmformat',('%H:%M:%S')),
+
+        ('open', -1),
+        ('high', -1),
+        ('low', -1),
+        ('volume', -1),
+        ('quote', -1),
+        
+        # ('token_id', 0),
+        # ('symbol', 1),
+        ('datetime', 2),
+        ('close', 3),
+        ('frama', 4),
+        ('ema', 5),
+        ('trend', 6),
+        ('signal', 7),
+    )

@@ -142,3 +142,12 @@ class EMACrossOverStrategy(bt.Strategy):
             else:
                 self.sell()
                 self.log('Short CREATE, %.2f' % self.dataclose[0])
+                
+                
+#################################### concepts ###########################################
+'''
+self.data targets self.datas[0]
+self.dataX targets self.datas[X]
+
+'''
+#################################### concepts ###########################################
