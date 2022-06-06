@@ -149,7 +149,7 @@ if __name__ == '__main__':
     cerebro.broker.setcash(100000.0)
 
         
-    datapath = ('TM_strategyEMA2.csv')
+    datapath = ('data/TM_strategyEMA2.csv')
     
     data = TM_strategy(dataname=datapath)
     cerebro.adddata(data)
