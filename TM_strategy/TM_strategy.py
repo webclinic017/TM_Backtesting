@@ -105,8 +105,8 @@ class TestStrategy(bt.Strategy):
         self.order = None
         
     def next(self):
-        self.log(self.close[0])
-        self.log(self.signal[0])
+        # self.log(self.close[0])
+        # self.log(self.signal[0])
         if self.position:
             if self.position.size < 0:
                 # signal = +1
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     cerebro = bt.Cerebro()
     
     cerebro.addstrategy(TestStrategy)
-    
+    cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     cerebro.broker.setcash(100000.0)
 
         
@@ -159,8 +159,21 @@ if __name__ == '__main__':
     
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
-    cerebro.run()
-
+    strats = cerebro.run()
+    
+    
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
     
-    cerebro.plot()
+    # cerebro.plot()
+    
+    strat = strats[0]
+    
+    pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    
+    
+    returns.to_csv('result/returns.csv')
+    positions.to_csv('result/positions.csv')
+    transactions.to_csv('result/transactions.csv')
+    gross_lev.to_csv('result/gross_lev.csv')
+    

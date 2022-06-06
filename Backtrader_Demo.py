@@ -88,8 +88,8 @@ def runstart(line_a,line_b,datapath):
     # cerebro.addanalyzer(bt.analyzers.TimeReturn, _name='TimeReturn')
     ######################### e.g end ###############################################
     
-    # * method 3: 
-    # cerebro.addanalyzer(bt.analyzers.PyFolio)
+    # * method 3 outsourced to the Pyfolio package: 
+    # cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     
     # TODO // Cash
     cerebro.broker.setcash(1000.0)
@@ -148,8 +148,25 @@ def runstart(line_a,line_b,datapath):
     # TimeReturn = strat.analyzers.getbyname('TimeReturn')
     # print(TimeReturn.get_analysis())
     ######################### e.g end ###############################################
+
+    # * method 3 Pyfolio package
+    
+    # pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    # returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    
+    # import pyfolio as pf
+    # pf.create_full_tear_sheet(
+    #     returns,
+    #     positions=positions,
+    #     transactions=transactions,
+    #     gross_lev=gross_lev,
+    #     live_start_date='2018-05-01',  # This date is sample specific
+    #     round_trips=True)
+    
     
     # TODO // Collect other information
+    
+    # * self-defined information
     Myown_result.append(line_a)
     Myown_result.append(line_b)
     
