@@ -52,8 +52,8 @@ def kline_data(stime, etime, symbol = 'BTCUSDT', interval = '1d'):
     
 if __name__ == '__main__':
     
-    stime = "2021-06-01"
-    etime = "2022-06-01"
+    stime = "2021-01-01"
+    etime = "2022-06-02"
     symbol = 'BTCUSDT'
     interval = '1d'
     

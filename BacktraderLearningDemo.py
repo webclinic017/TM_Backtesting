@@ -27,7 +27,7 @@ class TestStrategy(bt.Strategy):
         
         # slice the data
         self.cmpval = self.data.close(-1) > self.movav.lines[0]
-        self.avepass = self.time2[-3:-1]
+        # self.avepass = self.time2[-3:-1]
 
     def next(self):
         # * Obtain data
@@ -39,6 +39,7 @@ class TestStrategy(bt.Strategy):
         '''
         # self.data It has a lines attribute which contains a close attribute in turn
         self.log('Close, %.2f' % self.datas[0].close[0])
+        # self.log('Close, %.2f' % self.datas[0].lines[0][0])
         self.log('Time2: %.2f' % self.time2.lines[0][0])
         self.log('CmPAV: %.2f' % self.cmpval.lines[0][0])
         # self.log('Myslice: %.2f' % self.time2.lines[0][-5:0].sum())
