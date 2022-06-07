@@ -100,36 +100,50 @@ class TestStrategy(bt.Strategy):
         
     def next(self):
         
-        # self.log(self.close[0])
-        # self.log(self.signal[0])
+        self.log(self.close[0])
+        self.log(self.signal[0])
         
-        # already have a position
-        if self.position:
-            if self.position.size < 0:
-                # signal = +1
-                if self.signal[0] == 1:
-                    self.buy()
-                    self.buy()
+        # signal = +1
+        if self.signal[0] == 1:
+            self.buy()
         
-                
-            elif self.position.size > 0:
-                # signal = -1
-                if self.signal[0] == -1:
-                    self.sell()
-                    self.sell()
-                           
-        else:
-            # signal = +1
-            if self.signal[0] == 1:
-                self.buy()
+        # signal = -1
+        elif self.signal[0] == -1:
+            self.sell()
             
-            # signal = -1
-            elif self.signal[0] == -1:
-                self.sell()
+        # signal = 0
+        else:
+            pass
+        
+        # # already have a position
+        # if self.position:
+        #     # support we already have short position (-1 : sell 1 coins)
+        #     if self.position.size < 0:
+        #         # signal = +1
+        #         if self.signal[0] == 1:
+        #             self.close() # we close the short position
+        #             # self.sell()
+        #             self.buy() # we open a new long position
+        
                 
-            # signal = 0
-            else:
-                pass
+        #     elif self.position.size > 0:
+        #         # signal = -1
+        #         if self.signal[0] == -1:
+        #             self.close()
+        #             self.sell()
+                           
+        # else:
+        #     # signal = +1
+        #     if self.signal[0] == 1:
+        #         self.buy()
+            
+        #     # signal = -1
+        #     elif self.signal[0] == -1:
+        #         self.sell()
+                
+        #     # signal = 0
+        #     else:
+        #         pass
         
             
     def stop(self):
@@ -147,26 +161,26 @@ if __name__ == '__main__':
     cerebro.broker.setcash(10000.0)
 
     datapath = ('data/TM_strategyEMA2.csv')
-    data0 = TM_strategy(dataname=datapath)
+    data = TM_strategy(dataname=datapath)
     dataframe = pd.read_csv('data/ETH_1d.csv',
                                 # nrows=1000, # uncomment for large dataset
                                 parse_dates=True,
                                 index_col=0)
     data1 = bt.feeds.PandasData(dataname=dataframe)
     
-    cerebro.adddata(data0, name = 'BTC')
-    cerebro.adddata(data1, name='ETH')
+    cerebro.adddata(data, name = 'BTC')
+    # cerebro.adddata(data1, name='ETH')
     
     # * Benchmarking-observer modules
     # cerebro.addobserver(bt.observers.TimeReturn, 
     #                 timeframe=bt.TimeFrame.NoTimeFrame)
     
-    cerebro.addobserver(bt.observers.Benchmark, data = data1,
-                    timeframe=bt.TimeFrame.NoTimeFrame)
+    # cerebro.addobserver(bt.observers.Benchmark, data = data1,
+    #                 timeframe=bt.TimeFrame.NoTimeFrame)
     
     # * Benchmarking-analyzer modules
-    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years, data=data1, _name='datareturns')
-    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years, _name='timereturns')
+    # cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years, data=data1, _name='datareturns')
+    # cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years, _name='timereturns')
     
     cerebro.addsizer(bt.sizers.FixedSize, stake=.5)
     cerebro.broker.setcommission(commission=0.0004)
@@ -174,7 +188,6 @@ if __name__ == '__main__':
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
     strats = cerebro.run()
-    
     
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
     
