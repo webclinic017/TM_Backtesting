@@ -175,12 +175,12 @@ if __name__ == '__main__':
     # cerebro.addobserver(bt.observers.TimeReturn, 
     #                 timeframe=bt.TimeFrame.NoTimeFrame)
     
-    # cerebro.addobserver(bt.observers.Benchmark, data = data1,
-    #                 timeframe=bt.TimeFrame.NoTimeFrame)
+    cerebro.addobserver(bt.observers.Benchmark, data = data,
+                    timeframe=bt.TimeFrame.NoTimeFrame)
     
     # * Benchmarking-analyzer modules
-    # cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years, data=data1, _name='datareturns')
-    # cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years, _name='timereturns')
+    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years, data=data, _name='datareturns')
+    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years, _name='timereturns')
     
     cerebro.addsizer(bt.sizers.FixedSize, stake=.5)
     cerebro.broker.setcommission(commission=0.0004)
@@ -201,11 +201,12 @@ if __name__ == '__main__':
     tdata_analyzer = strat.analyzers.getbyname('datareturns')
     print(f"Benchmarking return: {tdata_analyzer.get_analysis()}")
 
-    # # * Save results for analyzing via pyfolio
-    # pyfoliozer = strat.analyzers.getbyname('pyfolio')
-    # returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
-    # returns.to_csv('result/returns.csv')
-    # positions.to_csv('result/positions.csv')
-    # transactions.to_csv('result/transactions.csv')
-    # gross_lev.to_csv('result/gross_lev.csv')
+    # * Save results for analyzing via pyfolio
+    pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    
+    returns.to_csv('result/returns.csv')
+    positions.to_csv('result/positions.csv')
+    transactions.to_csv('result/transactions.csv')
+    gross_lev.to_csv('result/gross_lev.csv')
     
