@@ -9,7 +9,6 @@ import pandas as pd
 
 import backtrader.feeds as btfeeds
     
-    
 
 class TM_strategy(btfeeds.GenericCSVData):
     # add one more columns called quote
@@ -46,9 +45,6 @@ class TestStrategy(bt.Strategy):
     def __init__(self):
         # Keep a reference to the "close" line in the data[0] dataseries
         self.close = self.datas[0].close
-        # self.frama = self.datas[0].frama
-        # self.ema = self.datas[0].ema
-        # self.trend = self.datas[0].trend
         self.signal = self.datas[0].signal
         
         # To keep track of pending orders
@@ -147,14 +143,32 @@ if __name__ == '__main__':
     
     cerebro.addstrategy(TestStrategy)
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
-    cerebro.broker.setcash(100000.0)
+    
+    cerebro.broker.setcash(10000.0)
 
     datapath = ('data/TM_strategyEMA2.csv')
+    data0 = TM_strategy(dataname=datapath)
+    dataframe = pd.read_csv('data/ETH_1d.csv',
+                                # nrows=1000, # uncomment for large dataset
+                                parse_dates=True,
+                                index_col=0)
+    data1 = bt.feeds.PandasData(dataname=dataframe)
     
-    data = TM_strategy(dataname=datapath)
-    cerebro.adddata(data)
+    cerebro.adddata(data0, name = 'BTC')
+    cerebro.adddata(data1, name='ETH')
     
-    cerebro.addsizer(bt.sizers.FixedSize, stake=.2)
+    # * Benchmarking-observer modules
+    # cerebro.addobserver(bt.observers.TimeReturn, 
+    #                 timeframe=bt.TimeFrame.NoTimeFrame)
+    
+    cerebro.addobserver(bt.observers.Benchmark, data = data1,
+                    timeframe=bt.TimeFrame.NoTimeFrame)
+    
+    # * Benchmarking-analyzer modules
+    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years, data=data1, _name='datareturns')
+    cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years, _name='timereturns')
+    
+    cerebro.addsizer(bt.sizers.FixedSize, stake=.5)
     cerebro.broker.setcommission(commission=0.0004)
     
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
@@ -164,16 +178,19 @@ if __name__ == '__main__':
     
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
     
-    # cerebro.plot()
-    
+    cerebro.plot()
     strat = strats[0]
     
+    # * Collecting the benchmark results
+    tret_analyzer = strat.analyzers.getbyname('timereturns')
+    print(f"Time return: {tret_analyzer.get_analysis()}")
+    
+    tdata_analyzer = strat.analyzers.getbyname('datareturns')
+    print(f"Benchmarking return: {tdata_analyzer.get_analysis()}")
 
     # # * Save results for analyzing via pyfolio
     # pyfoliozer = strat.analyzers.getbyname('pyfolio')
     # returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
-    
-    
     # returns.to_csv('result/returns.csv')
     # positions.to_csv('result/positions.csv')
     # transactions.to_csv('result/transactions.csv')

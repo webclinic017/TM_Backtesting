@@ -52,7 +52,7 @@ def kline_data(stime, etime, symbol = 'BTCUSDT', interval = '1d'):
     
 if __name__ == '__main__':
     
-    stime = "2021-01-01"
+    stime = "2021-01-02"
     etime = "2022-06-02"
     symbol = 'BTCUSDT'
     interval = '1d'
@@ -61,5 +61,5 @@ if __name__ == '__main__':
     global BASE_URL
     BASE_URL = 'https://fapi.binance.com' # production base url
     
-    data = kline_data(stime, etime, symbol = 'BTCUSDT', interval = '1d')
-    data.to_csv('data/BTC_1d.csv',index = False)
+    data = kline_data(stime, etime, symbol = 'ETHUSDT', interval = '1d')
+    data.to_csv('data/ETH_1d.csv',index = False)
