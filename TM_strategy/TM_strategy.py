@@ -63,6 +63,7 @@ class TestStrategy(bt.Strategy):
         
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do
+            # self.log('ORDER ACCEPTED/SUBMITTED')
             return
 
         # Check if an order has been completed
@@ -159,13 +160,16 @@ if __name__ == '__main__':
     cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     
     cerebro.broker.setcash(10000.0)
+    cerebro.broker.set_coc(True)
 
     datapath = ('data/TM_strategyEMA2.csv')
     data = TM_strategy(dataname=datapath)
+    
     dataframe = pd.read_csv('data/ETH_1d.csv',
                                 # nrows=1000, # uncomment for large dataset
                                 parse_dates=True,
                                 index_col=0)
+    
     data1 = bt.feeds.PandasData(dataname=dataframe)
     
     cerebro.adddata(data, name = 'BTC')
@@ -192,21 +196,21 @@ if __name__ == '__main__':
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
     
     cerebro.plot()
-    strat = strats[0]
+    # strat = strats[0]
     
-    # * Collecting the benchmark results
-    tret_analyzer = strat.analyzers.getbyname('timereturns')
-    print(f"Time return: {tret_analyzer.get_analysis()}")
+    # # * Collecting the benchmark results
+    # tret_analyzer = strat.analyzers.getbyname('timereturns')
+    # print(f"Time return: {tret_analyzer.get_analysis()}")
     
-    tdata_analyzer = strat.analyzers.getbyname('datareturns')
-    print(f"Benchmarking return: {tdata_analyzer.get_analysis()}")
+    # tdata_analyzer = strat.analyzers.getbyname('datareturns')
+    # print(f"Benchmarking return: {tdata_analyzer.get_analysis()}")
 
-    # * Save results for analyzing via pyfolio
-    pyfoliozer = strat.analyzers.getbyname('pyfolio')
-    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    # # * Save results for analyzing via pyfolio
+    # pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    # returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
     
-    returns.to_csv('result/returns.csv')
-    positions.to_csv('result/positions.csv')
-    transactions.to_csv('result/transactions.csv')
-    gross_lev.to_csv('result/gross_lev.csv')
+    # returns.to_csv('result/returns.csv')
+    # positions.to_csv('result/positions.csv')
+    # transactions.to_csv('result/transactions.csv')
+    # gross_lev.to_csv('result/gross_lev.csv')
     
