@@ -34,7 +34,7 @@ def kline_data(stime, etime, symbol = 'BTCUSDT', interval = '1d'):
         'endTime': etimestamp,
         'limit': 1000,
     }
-    url_path = '/fapi/v1/klines'
+    url_path = '/api/v3/klines'
     response = send_public_request(url_path, params)
     data = pd.DataFrame(response)
 
@@ -43,8 +43,8 @@ def kline_data(stime, etime, symbol = 'BTCUSDT', interval = '1d'):
 
     data.columns = col
     #       transfer the timestamp into time
-    data['time'] = pd.to_datetime(data['time'],unit='ms',utc=True).dt.strftime('%Y-%m-%d')
-    data['Close time'] = pd.to_datetime(data['Close time'],unit='ms',utc=True).dt.strftime('%Y-%m-%d')
+    data['time'] = pd.to_datetime(data['time'],unit='ms',utc=True)
+    data['Close time'] = pd.to_datetime(data['Close time'],unit='ms',utc=True)
     
     data.iloc[:,[1,2,3,4,5,7,9,10]] = data.iloc[:,[1,2,3,4,5,7,9,10]].astype(float)
     
@@ -52,14 +52,14 @@ def kline_data(stime, etime, symbol = 'BTCUSDT', interval = '1d'):
     
 if __name__ == '__main__':
     
-    stime = "2021-01-02"
-    etime = "2022-06-02"
+    stime = "2017-12-31"
+    etime = "2022-06-20"
     symbol = 'BTCUSDT'
-    interval = '1d'
+    interval = '1h'
     
     # for future market
     global BASE_URL
-    BASE_URL = 'https://fapi.binance.com' # production base url
+    BASE_URL = 'https://api.binance.com' # production base url
     
-    data = kline_data(stime, etime, symbol = 'ETHUSDT', interval = '1d')
-    data.to_csv('data/ETH_1d.csv',index = False)
+    data = kline_data(stime, etime, symbol = symbol, interval = interval)
+    data.to_csv('BTC_1h.csv',index = False)

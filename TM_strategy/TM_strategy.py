@@ -196,7 +196,7 @@ if __name__ == '__main__':
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
     
     cerebro.plot()
-    # strat = strats[0]
+    strat = strats[0]
     
     # # * Collecting the benchmark results
     # tret_analyzer = strat.analyzers.getbyname('timereturns')
@@ -205,9 +205,9 @@ if __name__ == '__main__':
     # tdata_analyzer = strat.analyzers.getbyname('datareturns')
     # print(f"Benchmarking return: {tdata_analyzer.get_analysis()}")
 
-    # # * Save results for analyzing via pyfolio
-    # pyfoliozer = strat.analyzers.getbyname('pyfolio')
-    # returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    # * Save results for analyzing via pyfolio
+    pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
     
     # returns.to_csv('result/returns.csv')
     # positions.to_csv('result/positions.csv')
