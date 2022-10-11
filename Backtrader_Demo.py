@@ -39,7 +39,7 @@ def runstart(line_a,line_b,datapath):
     # cerebro = bt.Cerebro(stdstats=False) # uncomment for deleting the default observers(broker, trades, BuySell)
     
     #* self-defined observers
-    cerebro.addobserver(OrderObserver)
+    # cerebro.addobserver(OrderObserver)
     
     #* default Observers
     # cerebro.addobserver(bt.observers.Broker)
