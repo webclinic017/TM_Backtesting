@@ -45,7 +45,7 @@ def runstart(line_a,line_b,datapath):
     # cerebro.addobserver(bt.observers.Broker)
     # cerebro.addobserver(bt.observers.Trades)
     # cerebro.addobserver(bt.observers.BuySell)
-    # cerebro.addobserver(bt.observers.DrawDown)
+    cerebro.addobserver(bt.observers.DrawDown)
     
     # TODO // Add a Data
     #* method 1: default pandas data frame

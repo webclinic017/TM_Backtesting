@@ -17,16 +17,17 @@ class TestStrategy(bt.Strategy):
         print('%s, %s' % (dt.isoformat(), txt))
 
     def __init__(self):
-        pass
+        # pass 
         
         # * Obtain the params
         self.movav = btind.SimpleMovingAverage(self.data, period=self.p.period)
         # self.movav which is a SimpleMovingAverage indicator It has a lines attribute which contains a sma attribute in turn
         
-        self.time2 = self.movav.lines[0] * 2
+        # self.time2 = self.movav.lines[0] * 2
         
         # slice the data
-        self.cmpval = self.data.close(-1) > self.movav.lines[0]
+        # self.cmpval = self.data.close(-1) > self.movav.lines[0]
+        self.posi = self.data.close(-1) < self.movav.lines[0]
         # self.avepass = self.time2[-3:-1]
 
     def next(self):
@@ -39,9 +40,11 @@ class TestStrategy(bt.Strategy):
         '''
         # self.data It has a lines attribute which contains a close attribute in turn
         self.log('Close, %.2f' % self.datas[0].close[0])
+        self.log('Movav, %.2f' % self.movav[0])
+        self.log('Position: %.0f' % self.posi[0])
         # self.log('Close, %.2f' % self.datas[0].lines[0][0])
-        self.log('Time2: %.2f' % self.time2.lines[0][0])
-        self.log('CmPAV: %.2f' % self.cmpval.lines[0][0])
+        # self.log('Time2: %.2f' % self.time2.lines[0][0])
+        # self.log('CmPAV: %.2f' % self.cmpval.lines[0][0])
         # self.log('Myslice: %.2f' % self.time2.lines[0][-5:0].sum())
         
         
@@ -60,7 +63,7 @@ if __name__ == '__main__':
                         # skiprows = range(1,1500),
                         parse_dates=True,
                         index_col=0)
-    
+    print(dataframe.info())
     data = bt.feeds.PandasData(dataname=dataframe)
     cerebro.adddata(data)
     
