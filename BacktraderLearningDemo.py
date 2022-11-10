@@ -9,7 +9,6 @@ class TestStrategy(bt.Strategy):
     # params = (('period', 20),)
     
     # lines = ('smavalue',)
-    
 
     def log(self, txt, dt=None):
         ''' Logging function for this strategy'''
@@ -70,5 +69,6 @@ if __name__ == '__main__':
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
     cerebro.run()
+    # cerebro.plot(type='candlestick')
 
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())

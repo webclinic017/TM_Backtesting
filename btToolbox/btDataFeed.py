@@ -63,3 +63,25 @@ class TM_strategy(btfeeds.GenericCSVData):
         ('trend', 6),
         ('signal', 7),
     )
+
+
+class TM_API_data(GenericCSVData):
+    # add only three columns called date, Bitcoin, Ethereum
+    lines = ('btc','eth')
+
+    params = (
+        ('nullvalue', float('NaN')),
+        ('dtformat', '%Y-%m-%d'),
+        ('tmformat', '%H:%M:%S'),
+
+        ('datetime', 0),
+        ('time', -1),
+        ('open', -1),
+        ('high', -1),
+        ('low', -1),
+        ('close', -1),
+        ('volume', -1),
+        ('openinterest', -1),
+        ('btc',1),
+        ('eth',2)
+    )

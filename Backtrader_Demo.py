@@ -70,8 +70,8 @@ def runstart(line_a,line_b,datapath):
     cerebro.adddata(data)
 
     # TODO // Add a strategy
-    cerebro.addstrategy(EMACrossOverStrategy,line_a = line_a,line_b=line_b)
-    # cerebro.addstrategy(DemoStrategy)
+    # cerebro.addstrategy(EMACrossOverStrategy,line_a = line_a,line_b=line_b)
+    cerebro.addstrategy(DemoStrategy)
     
     # TODO // Analyzer
     
