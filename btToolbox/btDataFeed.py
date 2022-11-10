@@ -65,7 +65,7 @@ class TM_strategy(btfeeds.GenericCSVData):
     )
 
 
-class TM_API_data(GenericCSVData):
+class TM_API_data(btfeeds.GenericCSVData):
     # add only three columns called date, Bitcoin, Ethereum
     lines = ('btc','eth')
 
