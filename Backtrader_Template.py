@@ -28,6 +28,7 @@ from btToolbox.btStrategies import EMACrossOverStrategy, DemoStrategy
 from btToolbox.btDataFeed import CSVData, PdData
 from btToolbox.btObervers import OrderObserver
 from btToolbox.btAnalyzers import MySharpeRatio
+from btToolbox.btDataFeed import btBinanceDataPd
     
                 
 def runstart(line_a,line_b,datapath):
@@ -66,8 +67,12 @@ def runstart(line_a,line_b,datapath):
     # # print(dataframe.info())
     # data = PdData(dataname = dataframe)
     
+    #* method 4: self-define binance data
+    # data = btBinanceDataPd(symbol = 'ETHUSDT',interval = '1d',startTime = '2021-01-01 00:00:00',endTime = '2022-12-31 00:00:00')
+
     #* add to cerebro
     cerebro.adddata(data)
+    # cerebro.adddata(data, name = 'eth')
 
     # TODO // Add a strategy
     # cerebro.addstrategy(EMACrossOverStrategy,line_a = line_a,line_b=line_b)
