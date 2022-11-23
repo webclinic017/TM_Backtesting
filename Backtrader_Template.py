@@ -29,8 +29,99 @@ from btToolbox.btDataFeed import CSVData, PdData
 from btToolbox.btObervers import OrderObserver
 from btToolbox.btAnalyzers import MySharpeRatio
 from btToolbox.btDataFeed import btBinanceDataPd
+from btToolbox.btIndicators import SMACloseSignal, SMAExitSignal
     
-                
+
+
+
+class MyIndicator(bt.Indicator):
+    lines = ('myline','nextline')
+    params = (('period', 15),)
+
+    def log(self, txt, dt=None):
+        ''' Logging function for this strategy'''
+        dt = dt or self.datas[0].datetime.datetime(0)
+        print('%s, %s' % (dt, txt))
+
+    def __init__(self):
+        self.lines.myline = self.data.close(0) - self.data.close(-1)
+
+    def next(self):
+        self.lines.nextline[0] = self.data.close[0] - self.data.close[-1]
+     
+class DemoStrategy(bt.Strategy):
+    params = (
+        ('period1', None),
+        ('period1',None),
+    )
+    # or
+    params = dict(line_a=None, line_b=None)
+
+    lines = ('sma',)
+
+    def log(self, txt, dt=None):
+        ''' Logging function for this strategy'''
+        dt = dt or self.datas[0].datetime.date(0)
+        print('%s, %s' % (dt.isoformat(), txt))
+
+    def __init__(self):
+        smadays = bt.ind.SMA(self.dnames.btc.close, period=self.p.period1)  # or self.dnames['days'], self.params.period1
+        cmpval = self.data.close(-1) > self.sma # DELAYED indexing
+        LinePlotterIndicator(cmpval, name='Close_over_SMA') # plot the indicator
+        self.test = MyIndicator(self.datas[0], period=15) # Access the Indicators. Note: All the lines in Indicator will be ploted automatically.
+
+    def next(self):
+        # data
+        self.log('Close, %.2f' % self.dnames.btc.close[0])
+        self.log('Quote, %.2f' % self.data.close[0]) # -> self.data targets self.datas[0], self.dataX targets self.datas[X]
+        self.log('Quote, %.2f' % self.data_btc.close[0])
+        self.log('Quote, %.2f' % self.data1_close[0])
+        self.log('Quote, %.2f' % self.datas[0].lines.close[0])
+
+        myslice = self.data.close.get(ago=0, size=1)  # default values show
+
+        # lines
+        self.log('SMA, %.2f' % self.lines.sma[0])
+
+        myslice = self.data.close.get(ago=0, size=1)  # default values show
+        '''
+        xxx.lines -> xxx.l
+        xxx.lines.name -> xxx.lines_name
+        self.data_name -> self.data.lines.name  (Strategies, Indicators)
+        self.data1_name -> self.data1.lines.name  (Strategies, Indicators)
+        self.lines[0] points to self.lines.sma
+        self.line points to self.lines[0]
+        self.lineX point to self.lines[X]
+        self.line_X point to self.lines[X]
+        self.dataY points to self.data.lines[Y]
+        self.dataX_Y points to self.dataX.lines[X] which is a full shorthard version of self.datas[X].lines[Y]
+        '''
+
+        # Others
+        self.data.close.buflen() # buflen reports the total number of bars which have been loaded for the Data Feed
+        len(self.data.close) # len reports the number of bars which have been loaded for the Data Feed
+
+
+    def prenext(self):
+        pass
+    def start(self):
+        pass
+    def stop(self):
+        pass
+    def nextstart(self):
+        pass
+    def notify_order(self, order):
+        pass
+    def notify_trade(self, trade):
+        pass
+    def notify_cashvalue(cash, value):
+        pass
+    def notify_fund(self, cash, value, fundvalue, shares):
+        pass
+    def notify_store(self, msg, *args, **kwargs):
+        pass
+
+
 def runstart(line_a,line_b,datapath):
     
     # TODO // Create a Cerebro
@@ -73,13 +164,18 @@ def runstart(line_a,line_b,datapath):
     #* add to cerebro
     cerebro.adddata(data)
     # cerebro.adddata(data, name = 'eth')
+    # cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes, compression=60, name='eth')
+
 
     # TODO // Add a strategy
     # cerebro.addstrategy(EMACrossOverStrategy,line_a = line_a,line_b=line_b)
     cerebro.addstrategy(DemoStrategy)
+
+    # TODO // Add Indicators (compared with the strategy)
+    # cerebro.add_signal(bt.SIGNAL_LONG, SMACloseSignal, period=10)
+    # cerebro.add_signal(bt.SIGNAL_LONGEXIT, SMAExitSignal, p1=5, p2=30)
     
     # TODO // Analyzer
-    
     # * method 1: self-defined analyzers
     cerebro.addanalyzer(MySharpeRatio, _name='MySharpeRatio')
     
