@@ -13,9 +13,10 @@ class KeltnerChannel(bt.Indicator):
     def log(self, txt, dt=None):
         ''' Logging function for this strategy'''
         dt = dt or self.datas[0].datetime.datetime(0)
-        print('%s, %s' % (dt, txt))
+        # print('%s, %s' % (dt, txt))
 
     def __init__(self):
+
         self.tr1 = self.data.high - self.data.low
         self.tr2 = abs(self.data.high - self.data.close(-1))
         self.tr3 = abs(self.data.low - self.data.close(-1))
@@ -30,14 +31,14 @@ class KeltnerChannel(bt.Indicator):
 
 # Create a Stratey
 class TestStrategy(bt.Strategy):
-    params = dict(period=20)
+    params = dict(tr_period=10, kc_period=20, kc_mult=2)
     #* or
     lines = ('rsi',)
 
     def log(self, txt, dt=None):
         ''' Logging function for this strategy'''
         dt = dt or self.datas[0].datetime.datetime(0)
-        print('%s, %s' % (dt, txt))
+        # print('%s, %s' % (dt, txt)) 
 
  
     def notify_order(self, order):
@@ -83,7 +84,7 @@ class TestStrategy(bt.Strategy):
         self.dataclose = self.data.close
 
         # for indicators
-        self.kc = KeltnerChannel(self.datas[0], tr_period=10, kc_period=20, kc_mult=2)
+        self.kc = KeltnerChannel(self.datas[0], tr_period=self.p.tr_period, kc_period=self.p.kc_period, kc_mult=self.p.kc_mult)
         self.kc.plotinfo.subplot = False
 
         self.kc_middle = self.kc.lines.kc_middle
@@ -99,61 +100,57 @@ class TestStrategy(bt.Strategy):
         self.buycomm = None
 
     def next(self):
+        cash = self.broker.get_cash()
+        size = cash/self.dataclose[0]
+
         self.log('Close, %.2f' % self.datas[0].close[0])
-        self.log('KC Middle, %.2f' % self.kc_middle[0])
-        self.log('KC Upper, %.2f' % self.kc_upper[0])
-        self.log('KC Lower, %.2f' % self.kc_lower[0])
-        self.log('ATR, %.2f' % self.atr[0])
-
-        # Check if an order is pending ... if yes, we cannot send a 2nd one
-        if self.order:
-            return
-
-        # stop trading if there is a high ATR value
-        if self.atr[0] > 700:
-            return
-
-        if not self.position:
-
-            # if self.kc_upper[0] - self.dataclose[0] < 0.5 * self.atr[0]:
-                
-            #     if (self.dataclose[0] > self.dataclose[-1] and self.dataclose[-1] > self.dataclose[-2]) and (
-            #         self.l.rsi[0] < self.l.rsi[-1] and self.l.rsi[-1] < self.l.rsi[-2]):
-
-            #         self.log('SELL CREATE, %.2f' % self.dataclose[0])
-            #         self.order = self.sell()
-
-            # elif self.dataclose[0] - self.kc_lower[0] < 0.5 * self.atr[0]:
-
-            #     if (self.dataclose[0] < self.dataclose[-1] and self.dataclose[-1] < self.dataclose[-2]) and (
-            #         self.l.rsi[0] > self.l.rsi[-1] and self.l.rsi[-1] > self.l.rsi[-2]):
-
-            #         self.log('BUY CREATE, %.2f' % self.dataclose[0])
-            #         self.order = self.buy()
+        # self.log('KC Middle, %.2f' % self.kc_middle[0])
+        # self.log('KC Upper, %.2f' % self.kc_upper[0])
+        # self.log('KC Lower, %.2f' % self.kc_lower[0])
+        # self.log('ATR, %.2f' % self.atr[0])
+        self.log('Position, %.2f' % self.position.size)
             
-            if self.kc_upper[0] - self.dataclose[0] < 0.5 * self.atr[0]:
-
-                self.log('SELL CREATE, %.2f' % self.dataclose[0])
-                self.order = self.sell()
-
-            elif self.dataclose[0] - self.kc_lower[0] < 0.5 * self.atr[0]:
-
-                self.log('BUY CREATE, %.2f' % self.dataclose[0])
-                self.order = self.buy()
-
+        # Check if an order is pending ... if yes, we cannot send a 2nd one
+        if not self.position:
+            if self.atr[0] > 700:
+                return
             else:
+            
+                if  (self.dataclose[0] < self.kc_upper[0]) and (self.dataclose[-1]) and (self.kc_upper[-1] - self.dataclose[0] < 0.5 * self.atr[0]):
+                    # if self.dataclose[0] < self.dataclose[-1]:
+                    self.log('SELL CREATE, %.2f' % self.dataclose[0])
+                    self.order = self.sell(size=size)
+
+
+                elif  (self.dataclose[0] > self.kc_lower[0]) and (self.dataclose[-1] > self.kc_lower[-1])  and (self.dataclose[0] - self.kc_lower[0] < 0.5 * self.atr[0]):
+                    # if self.dataclose[0] > self.dataclose[-1]:
+
+                    self.log('BUY CREATE, %.2f' % self.dataclose[0])
+                    self.order = self.buy(size=size)
+
+                else:
+                    return
+
+        # sell
+        elif self.position.size < 0:
+            # stop profit
+            if self.dataclose[0] - self.kc_lower[0] < 0.5 * self.atr[0]:
+                self.log('Stop Profit on Sell, %.2f' % self.dataclose[0])
                 self.order = self.close()
 
-        else:
-            if self.position.size < 0:
-                if self.dataclose[0] < self.kc_middle[0]:
-                    self.log('BUY CLOSE, %.2f' % self.dataclose[0])
-                    self.order = self.close()
+            # stop loss
+            elif self.dataclose[0] > self.kc_upper[0] :
+                self.log('Stop Loss on Sell, %.2f' % self.dataclose[0])
+                self.order = self.close()
 
-            elif self.position.size > 0:
-                if self.dataclose[0] > self.kc_middle[0]:
-                    self.log('SELL CLOSE, %.2f' % self.dataclose[0])
-                    self.order = self.close()
+        elif self.position.size > 0:
+            if self.kc_upper[0] - self.dataclose[0] < 0.5 * self.atr[0]:
+                self.log('Stop Profit on Buy, %.2f' % self.dataclose[0])
+                self.order = self.close()
+
+            elif self.dataclose[0] < self.kc_lower[0] :
+                self.log('Stop Loss on Buy, %.2f' % self.dataclose[0])
+                self.order = self.close()
         
     def stop(self):
         if self.position:
@@ -162,39 +159,68 @@ class TestStrategy(bt.Strategy):
                 (self.broker.getvalue()))
 
 
+def run_start(tr_period=14, kc_period=20, kc_mult=2):
 
-if __name__ == '__main__':
-    
     cerebro = bt.Cerebro(stdstats=True)
     
-    cerebro.addstrategy(TestStrategy)
-    # cerebro.optstrategy(TestStrategy, period=range(10, 31),test = 3)
+    cerebro.addstrategy(TestStrategy, tr_period=14, kc_period=20, kc_mult=2)
     
     cerebro.broker.setcash(100000.0)
     cerebro.broker.setcommission(commission=0.0004)
     
-    btc = btBinanceDataPd(symbol = 'BTCUSDT',interval = '1h',startTime = '2022-01-01 00:00:00',endTime = '2022-02-01 00:00:00')
+    btc = btBinanceDataPd(symbol = 'BTCUSDT',interval = '1h',startTime = '2022-01-01 00:00:00',endTime = '2022-11-01 00:00:00')
     cerebro.adddata(btc, name = 'btc_day')
     cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='SharpeRatio')
     cerebro.addanalyzer(bt.analyzers.AnnualReturn, _name='AnnualReturn')
     cerebro.addanalyzer(bt.analyzers.DrawDown, _name='DrawDown')
     cerebro.addanalyzer(bt.analyzers.TimeDrawDown, _name='TimeDrawDown')
     cerebro.addanalyzer(bt.analyzers.TimeReturn, _name='TimeReturn')
-
+    cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
     results = cerebro.run()
     strat = results[0]
-    cerebro.plot(style = 'candlestick')
+    # cerebro.plot(style = 'candlestick')
     
     SharpeRatio = strat.analyzers.SharpeRatio.get_analysis()
-    print('Sharpe Ratio:', SharpeRatio)
     AnnualReturn = strat.analyzers.AnnualReturn.get_analysis()
-    print('Annual Return:', AnnualReturn)
     DrawDown = strat.analyzers.DrawDown.get_analysis()
-    print('DrawDown:', DrawDown)
     TimeDrawDown = strat.analyzers.TimeDrawDown.get_analysis()
+
+    print('DrawDown:', DrawDown)
+    print('Annual Return:', AnnualReturn)
+    print('Sharpe Ratio:', SharpeRatio)
     print('TimeDrawDown:', TimeDrawDown)
 
+    pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    returns.to_csv('result/returns.csv')
+    positions.to_csv('result/positions.csv')
+    transactions.to_csv('result/transactions.csv')
+    gross_lev.to_csv('result/gross_lev.csv')
 
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+
+    return [tr_period, kc_period, kc_mult, SharpeRatio, AnnualReturn, DrawDown, TimeDrawDown]
+
+def validation():
+    tr_period = range(10,15)
+    kc_period = range(15,25)
+    kc_mult = range(1, 3)
+
+    result = []
+    for tr in tr_period:
+        for kc in kc_period:
+            for mult in kc_mult:
+                result.append(run_start(tr_period=tr, kc_period=kc, kc_mult=mult))
+                print('tr_period: %d, kc_period: %d, kc_mult: %d' % (tr, kc, mult))
+
+
+    return pd.DataFrame(result, columns=['tr_period', 'kc_period', 'kc_mult', 'SharpeRatio', 'AnnualReturn', 'DrawDown', 'TimeDrawDown'])
+
+if __name__ == '__main__':
+    
+    print(run_start(tr_period=10, kc_period=20, kc_mult=2))
+
+    # res = validation()
+    # res.to_csv('Validation/MeanReversion.csv')

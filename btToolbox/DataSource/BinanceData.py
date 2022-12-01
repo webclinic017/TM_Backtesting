@@ -118,7 +118,7 @@ class Binance():
         return data
 
 
-    def returnData(self, symbol,startTime,endTime,interval = '1d',BASE_URL = 'https://api.binance.com', url_path = '/api/v3/klines'):
+    def returnData(self, symbol,startTime,endTime,interval,BASE_URL, url_path):
         self.BASE_URL = BASE_URL
         self.url_path = url_path
         startTime = self.time_format(startTime)
@@ -126,8 +126,8 @@ class Binance():
         data = self.Long_data(pair = symbol,startTime = startTime,endTime = endTime,interval = interval)
         return data.set_index('time')
 
-def binanceData(symbol,startTime,endTime,interval = '1d',BASE_URL = 'https://api.binance.com', url_path = '/api/v3/klines'):
-    binance = Binance()
+def binanceData(symbol,startTime,endTime,interval = '1d',BASE_URL = ' https://api.binance.com', url_path = '/api/v3/klines'):
+    binance = Binance(BASE_URL=BASE_URL, url_path=url_path)
     data = binance.returnData(symbol,startTime,endTime,interval,BASE_URL,url_path)
     return data
 

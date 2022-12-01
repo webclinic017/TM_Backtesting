@@ -151,7 +151,23 @@ class TestStrategy(bt.Strategy):
         
         self.close()
         print('Close the order')
-        
+
+
+class OrderObserver(bt.observer.Observer):
+    lines = ('myobserver', 'expired',)
+
+    plotinfo = dict(plot=True, subplot=True, plotlinelabels=True)
+
+    plotlines = dict(
+        myobserver=dict(marker='*', markersize=8.0, color='lime', fillstyle='full'),
+        expired=dict(marker='s', markersize=8.0, color='red', fillstyle='full')
+    )
+
+    def next(self):
+        self.lines.myobserver[0] = 1
+        self.lines.expired[0] = 2
+
+
 if __name__ == '__main__':
     
     cerebro = bt.Cerebro()
@@ -176,11 +192,13 @@ if __name__ == '__main__':
     # cerebro.adddata(data1, name='ETH')
     
     # * Benchmarking-observer modules
-    # cerebro.addobserver(bt.observers.TimeReturn, 
-    #                 timeframe=bt.TimeFrame.NoTimeFrame)
+    cerebro.addobserver(bt.observers.TimeReturn, 
+                    timeframe=bt.TimeFrame.NoTimeFrame)
     
     cerebro.addobserver(bt.observers.Benchmark, data = data,
                     timeframe=bt.TimeFrame.NoTimeFrame)
+
+    cerebro.addobserver(OrderObserver)
     
     # * Benchmarking-analyzer modules
     cerebro.addanalyzer(bt.analyzers.TimeReturn, timeframe=bt.TimeFrame.Years, data=data, _name='datareturns')

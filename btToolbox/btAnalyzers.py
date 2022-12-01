@@ -35,3 +35,25 @@ class MySharpeRatio(Analyzer):
 
     def get_analysis(self):
         return dict(sharperatio=self.ratio)
+
+
+
+class MyAnalyzer(bt.Analyzer):
+    params = (('riskfreerate', 0.01),)
+
+    def __init__(self):
+        print('This is my sharpe ratio analyzer')
+
+    def start(self):
+        # Not needed ... but could be used
+        print('Starting sharpe ratio analyzer')
+
+    def next(self):
+        print('Next sharpe ratio analyzer')
+
+    def stop(self):
+        print('Stopping sharpe ratio analyzer')
+        self.ratio = 5
+
+    def get_analysis(self):
+        return dict(MyAnalyzer=self.ratio)

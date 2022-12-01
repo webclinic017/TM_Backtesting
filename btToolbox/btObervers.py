@@ -8,6 +8,7 @@ import backtrader as bt
 
 
 class OrderObserver(bt.observer.Observer):
+
     lines = ('created', 'expired',)
 
     plotinfo = dict(plot=True, subplot=True, plotlinelabels=True)
@@ -34,3 +35,21 @@ class OrderObserver(bt.observer.Observer):
 
             elif order.status in [bt.Order.Expired]:
                 self.lines.expired[0] = order.created.price
+
+
+class OrderObserver(bt.observer.Observer):
+    # Should not be a null Strategy (Nothing acted during the strategy)
+    # or, it will cast a error: 'Cerebro' object has no attribute '_exactbars'
+
+    lines = ('myobserver', 'expired',)
+
+    plotinfo = dict(plot=True, subplot=True, plotlinelabels=True)
+
+    plotlines = dict(
+        myobserver=dict(marker='*', markersize=8.0, color='lime', fillstyle='full'),
+        expired=dict(marker='s', markersize=8.0, color='red', fillstyle='full')
+    )
+
+    def next(self):
+        self.lines.myobserver[0] = 1
+        slf.lines.expired[0] = 2

@@ -32,6 +32,20 @@ from btToolbox.btDataFeed import btBinanceDataPd
 from btToolbox.btIndicators import SMACloseSignal, SMAExitSignal
     
 
+class MyDataFeed(bt.feeds.PandasData):
+    # add one more columns called quote
+    lines = ('quote',)
+
+    params = (
+        ('datetime', -1),
+        
+        ('open', 0),
+        ('high', 1),
+        ('low', 2),
+        ('close', 3),
+        ('volume', 4),
+        ('quote', -1),
+    )
 
 
 class MyIndicator(bt.Indicator):
@@ -168,6 +182,21 @@ def runstart(line_a,line_b,datapath):
 
 
     # TODO // Add a strategy
+
+    # cerebro.optstrategy(TestStrategy, period=range(10, 30))
+    """
+    # In case of the optstrategy:
+    ## For 'DataFeed':
+    Data feed: only support the same local file, for example, data = bt.feeds.GenericCSVData(dataname='data.csv')
+
+
+    ## For 'optstrategy' and 'optanalyzer':
+    thestrats = cerebro.run()
+    for i in thestrats: 
+        print(i[0].p.period)
+        print(i[0].analyzers.MyAnalyzer.get_analysis())
+    """
+    
     # cerebro.addstrategy(EMACrossOverStrategy,line_a = line_a,line_b=line_b)
     cerebro.addstrategy(DemoStrategy)
 
@@ -207,7 +236,7 @@ def runstart(line_a,line_b,datapath):
     # TODO // Run over everything
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
     Myown_result.append(cerebro.broker.getvalue()) # (Initial portfolio value) save to the list
-    results = cerebro.run()
+    results = cerebro.run() # if optimize the strategy, the results will be a list of lists, else, it will be the first strategy object
     
     print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
     Myown_result.append(cerebro.broker.getvalue()) # (Final portfolio value) save to the list
@@ -255,6 +284,11 @@ def runstart(line_a,line_b,datapath):
     # pyfoliozer = strat.analyzers.getbyname('pyfolio')
     # returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
     
+    # returns.to_csv('result/returns.csv')
+    # positions.to_csv('result/positions.csv')
+    # transactions.to_csv('result/transactions.csv')
+    # gross_lev.to_csv('result/gross_lev.csv')
+
     # import pyfolio as pf
     # pf.create_full_tear_sheet(
     #     returns,
