@@ -83,7 +83,7 @@ class DemoStrategy(bt.Strategy):
         cmpval = self.data.close(-1) > self.sma # DELAYED indexing
         LinePlotterIndicator(cmpval, name='Close_over_SMA') # plot the indicator
         self.test = MyIndicator(self.datas[0], period=15) # Access the Indicators. Note: All the lines in Indicator will be ploted automatically.
-
+        self.upper = bt.LineNum(0.0) # create a 0 line and update it during the next() function
     def next(self):
         # data
         self.log('Close, %.2f' % self.dnames.btc.close[0])
@@ -96,7 +96,6 @@ class DemoStrategy(bt.Strategy):
 
         # lines
         self.log('SMA, %.2f' % self.lines.sma[0])
-
         myslice = self.data.close.get(ago=0, size=1)  # default values show
         '''
         xxx.lines -> xxx.l
@@ -115,7 +114,8 @@ class DemoStrategy(bt.Strategy):
         self.data.close.buflen() # buflen reports the total number of bars which have been loaded for the Data Feed
         len(self.data.close) # len reports the number of bars which have been loaded for the Data Feed
 
-
+        # Operation on the line
+        self.l.upper[0] = max(self.data.high.get(size = self.p.upn), default = 0) # get the max one from the past data
     def prenext(self):
         pass
     def start(self):
