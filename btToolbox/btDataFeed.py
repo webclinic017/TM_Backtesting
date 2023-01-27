@@ -5,6 +5,25 @@
 
 import backtrader.feeds as btfeeds
 from btToolbox.DataSource.BinanceData import binanceData
+from typing import Dict, List, Union, Optional, Any
+
+
+# // Note
+"""
+1. The default variables are as following
+
+datetime (default: 0) column containing the date (or datetime) field
+
+time (default: -1) column containing the time field if separate from the datetime field (-1 indicates it’s not present)
+
+open (default: 1) , high (default: 2), low (default: 3), close (default: 4), volume (default: 5), openinterest (default: 6)
+
+specifically, if we need to define those default parameters and set as -1 when we do not have certain column.
+
+
+
+"""
+
 class CSVData(btfeeds.GenericCSVData):
     # add one more columns called quote
     lines = ('quote',)
