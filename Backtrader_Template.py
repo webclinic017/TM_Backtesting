@@ -216,6 +216,8 @@ def runstart(line_a,line_b,datapath):
     # cerebro.addanalyzer(bt.analyzers.DrawDown, _name='DrawDown')
     # cerebro.addanalyzer(bt.analyzers.TimeDrawDown, _name='TimeDrawDown')
     # cerebro.addanalyzer(bt.analyzers.TimeReturn, _name='TimeReturn')
+    # cerebro.addanalyzer(bt.analyzers.Returns, _name='Returns')
+    # cerebro.addanalyzer(bt.analyzers.SharpeRatio_A, _name='SharpeRatio_A')
     ######################### e.g end ###############################################
     
     # * method 3 outsourced to the Pyfolio package: 
@@ -277,6 +279,9 @@ def runstart(line_a,line_b,datapath):
     
     # TimeReturn = strat.analyzers.getbyname('TimeReturn')
     # print(TimeReturn.get_analysis())
+
+    # Returns = strat.analyzers.getbyname('Returns')
+    # print(Returns.get_analysis())
     ######################### e.g end ###############################################
 
     # * method 3 Pyfolio package

@@ -1,176 +1,11 @@
-# Author: Cholian Li
-# Contact: 
-# cholianli970518@gmail.com
-# Created at 20220601
+import pandas as pd
+import numpy as np
 
 import backtrader as bt
-import talib as ta
-
-#################################### Note ###########################################
-# // Note
-"""
-1. Method to add the signal based on the simple calculate of the data
-
-- Could be calculate directly in the `__init__()` of the Strategy
-
-E.g
-```
-def __init__(self):
-    self.signal = self.datas[0].trader_grade(0) > self.datas[0].trader_grade(-1)
-```
-
-"""
-
-#################################### concepts ###########################################
-
-# // Concept
-'''
-self.data targets self.datas[0]
-self.dataX targets self.datas[X]
-
-'''
-
-#################################### Examples ###########################################
+import backtrader.indicators as btind
+from btToolbox.btDataFeed import btBinanceDataPd
 
 
-# Create a Stratey
-class DemoStrategy(bt.Strategy):
-
-    def log(self, txt, dt=None):
-        ''' Logging function for this strategy'''
-        dt = dt or self.datas[0].datetime.date(0)
-        print('%s, %s' % (dt.isoformat(), txt))
-
-    def __init__(self):
-        # Keep a reference to the "close" line in the data[0] dataseries
-        self.dataclose = self.datas[0].close
-        self.quote = self.datas[0].quote
-
-    def next(self):
-        # Simply log the closing price of the series from the reference
-        self.log('Close, %.2f' % self.dataclose[0])
-        self.log('Quote, %.2f' % self.quote[0])
-
-
-# Create a Stratey
-class EMACrossOverStrategy(bt.Strategy):
-    params = (
-        ('line_a', None),
-        ('line_b',None),
-    )
-
-    def log(self, txt, dt=None):
-        
-        # pass
-    
-        ''' Logging function for this strategy'''
-        dt = dt or self.datas[0].datetime.datetime(0)
-        print('%s, %s' % (dt, txt))
-
-    def __init__(self):
-        # Keep a reference to the "close" line in the data[0] dataseries
-        self.dataclose = self.datas[0].close
-        
-        # To keep track of pending orders
-        self.order = None
-        self.buyprice = None
-        self.buycomm = None
-        
-        # Add a EMA indicator
-        self.ema_a = bt.talib.EMA(self.dataclose, timeperiod=self.params.line_a,plotname = 'ema_a',)
-        self.ema_b = bt.talib.EMA(self.dataclose, timeperiod=self.params.line_b,plotname = 'ema_b',)
-        
-        
-    def notify_order(self, order):
-        
-        if order.status in [order.Submitted, order.Accepted]:
-            # Buy/Sell order submitted/accepted to/by broker - Nothing to do
-            return
-
-        # Check if an order has been completed
-        # Attention: broker could reject order if not enough cash
-        if order.status in [order.Completed]:
-            
-            if order.isbuy():
-                self.log(
-                    'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                    (order.executed.price,
-                     order.executed.value,
-                     order.executed.comm))
-                
-                self.buyprice = order.executed.price
-                self.buycomm = order.executed.comm
-                
-            elif order.issell() : # Sell
-                self.log('SELL EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                    (order.executed.price,
-                     order.executed.value,
-                     order.executed.comm))
-
-            elif order.isclose():
-                self.log('Order closed EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                    (order.executed.price,
-                     order.executed.value,
-                     order.executed.comm))
-            self.bar_executed = len(self)
-
-        elif order.status in [order.Canceled, order.Margin, order.Rejected]:
-            self.log('Order Canceled/Margin/Rejected')
-
-        # Write down: no pending order
-        self.order = None
-        
-   
-    def notify_trade(self, trade):
-        if not trade.isclosed:
-            return
-
-        self.log('OPERATION PROFIT, GROSS %.2f, NET %.2f' %
-                 (trade.pnl, trade.pnlcomm))     
-
-    def next(self):
-        # Simply log the closing price of the series from the reference
-        self.log('Close, %.2f' % self.dataclose[0])
-        self.log(f'EMA_a: {self.ema_a[0]},EMA_b: {self.ema_b[0]},')
-        
-        # Check if an order is pending ... if yes, we cannot send a 2nd one
-        if self.order:
-            return
-        
-        # If the Fast line cross over the slow line
-        if self.ema_a[0] > self.ema_b[0]:
-            
-            # If there is already an order in a position
-            if self.position:
-                
-                # If is has an short order, we should transfer the short position to the long position
-                if self.position.size < 0:
-                    # close the previous position, e.g: long
-                    self.buy()
-                    # buyin a new long position
-                    self.buy()
-                    self.log('Short --> Long  CREATE, %.2f' % self.dataclose[0])
-                    
-            # if there is no order in a position, we should order the position 
-            # according to the current EMA singal, here we assumed the long position
-            else:
-                self.buy()
-                self.log('Long CREATE, %.2f' % self.dataclose[0])
-             
-        #    Opposite to above
-        elif self.ema_a[0] < self.ema_b[0]:
-            
-            if self.position:
-                if self.position.size > 0:
-                    self.sell()
-                    self.sell()
-                    self.log('Long --> Short  CREATE, %.2f' % self.dataclose[0])
-                    
-            else:
-                self.sell()
-                self.log('Short CREATE, %.2f' % self.dataclose[0])
-                
-                
 class KeltnerChannel(bt.Indicator):
     lines = ('atr','kc_upper','kc_middle','kc_lower')
     params = (('tr_period', 10), ('kc_period', 20),('kc_mult', 2),)
@@ -195,7 +30,7 @@ class KeltnerChannel(bt.Indicator):
         pass
 
 # Create a Stratey
-class KeltnerChannelStrategy(bt.Strategy):
+class TestStrategy(bt.Strategy):
     params = dict(tr_period=10, kc_period=20, kc_mult=2)
     #* or
     lines = ('rsi',)
@@ -322,3 +157,70 @@ class KeltnerChannelStrategy(bt.Strategy):
             self.order = self.close()
         self.log('Ending Value %.2f' %
                 (self.broker.getvalue()))
+
+
+def run_start(tr_period=14, kc_period=20, kc_mult=2):
+
+    cerebro = bt.Cerebro(stdstats=True)
+    
+    cerebro.addstrategy(TestStrategy, tr_period=14, kc_period=20, kc_mult=2)
+    
+    cerebro.broker.setcash(100000.0)
+    cerebro.broker.setcommission(commission=0.0004)
+    
+    btc = btBinanceDataPd(symbol = 'BTCUSDT',interval = '1h',startTime = '2022-01-01 00:00:00',endTime = '2022-11-01 00:00:00')
+    cerebro.adddata(btc, name = 'btc_day')
+    cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name='SharpeRatio')
+    cerebro.addanalyzer(bt.analyzers.AnnualReturn, _name='AnnualReturn')
+    cerebro.addanalyzer(bt.analyzers.DrawDown, _name='DrawDown')
+    cerebro.addanalyzer(bt.analyzers.TimeDrawDown, _name='TimeDrawDown')
+    cerebro.addanalyzer(bt.analyzers.TimeReturn, _name='TimeReturn')
+    cerebro.addanalyzer(bt.analyzers.PyFolio, _name='pyfolio')
+    print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
+
+    results = cerebro.run()
+    strat = results[0]
+    # cerebro.plot(style = 'candlestick')
+    
+    SharpeRatio = strat.analyzers.SharpeRatio.get_analysis()
+    AnnualReturn = strat.analyzers.AnnualReturn.get_analysis()
+    DrawDown = strat.analyzers.DrawDown.get_analysis()
+    TimeDrawDown = strat.analyzers.TimeDrawDown.get_analysis()
+
+    print('DrawDown:', DrawDown)
+    print('Annual Return:', AnnualReturn)
+    print('Sharpe Ratio:', SharpeRatio)
+    print('TimeDrawDown:', TimeDrawDown)
+
+    pyfoliozer = strat.analyzers.getbyname('pyfolio')
+    returns, positions, transactions, gross_lev = pyfoliozer.get_pf_items()
+    returns.to_csv('result/returns.csv')
+    positions.to_csv('result/positions.csv')
+    transactions.to_csv('result/transactions.csv')
+    gross_lev.to_csv('result/gross_lev.csv')
+
+    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+
+    return [tr_period, kc_period, kc_mult, SharpeRatio, AnnualReturn, DrawDown, TimeDrawDown]
+
+def validation():
+    tr_period = range(10,15)
+    kc_period = range(15,25)
+    kc_mult = range(1, 3)
+
+    result = []
+    for tr in tr_period:
+        for kc in kc_period:
+            for mult in kc_mult:
+                result.append(run_start(tr_period=tr, kc_period=kc, kc_mult=mult))
+                print('tr_period: %d, kc_period: %d, kc_mult: %d' % (tr, kc, mult))
+
+
+    return pd.DataFrame(result, columns=['tr_period', 'kc_period', 'kc_mult', 'SharpeRatio', 'AnnualReturn', 'DrawDown', 'TimeDrawDown'])
+
+if __name__ == '__main__':
+    
+    print(run_start(tr_period=10, kc_period=20, kc_mult=2))
+
+    # res = validation()
+    # res.to_csv('Validation/MeanReversion.csv')
